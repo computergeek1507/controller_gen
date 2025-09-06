@@ -3,9 +3,9 @@
 Export Controller Specific FSEQ Files
 
 ### Building
-Uses C++23, QT 5.15, spdlog, and cMake 3.20.
+Uses C++23, QT 5.15, spdlog, zstd, pugixml, and cMake 3.20.
 
-```git clone https://github.com/computergeek1507/fpp_view.git```
+```git clone https://github.com/computergeek1507/controller_gen.git```
 
 To build on Windows, use Visual Studio 2022
 
@@ -20,5 +20,5 @@ mkdir build
 cd build
 cmake ..
 cmake --build .
-./fpp_view
+./controller_gen
 ```
