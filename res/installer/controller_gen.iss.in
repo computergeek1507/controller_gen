@@ -1,0 +1,37 @@
+#define MyTitleName "@PROJECT_NAME@"
+#define Version "@PROJECT_VERSION@"
+
+[Setup]
+DisableDirPage=no   
+ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64
+
+AppName={#MyTitleName}
+AppVersion={#Version}
+DefaultDirName={commonpf64}\{#MyTitleName}
+DefaultGroupName={#MyTitleName}
+SetupIconFile=..\@PROJECT_NAME@.ico
+ChangesAssociations = yes
+UninstallDisplayIcon={app}\{#MyTitleName}.exe
+Compression=lzma2
+SolidCompression=yes
+OutputDir=output
+OutputBaseFilename={#MyTitleName}_{#Version}
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "Do you want to create desktop icon?"; Flags: checkablealone
+
+[Files]
+Source: "..\..\cmake_vs\Release\{#MyTitleName}.exe"; DestDir: "{app}"
+Source: "..\@PROJECT_NAME@.ico"; DestDir: "{app}"
+Source: "..\..\cmake_vs\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\cmake_vs\Release\platforms\*.dll"; DestDir: "{app}\platforms\"; Flags: ignoreversion  
+Source: "..\..\cmake_vs\Release\imageformats\*.dll"; DestDir: "{app}\imageformats\"; Flags: ignoreversion
+Source: "..\..\cmake_vs\Release\styles\*.dll"; DestDir: "{app}\styles\"; Flags: ignoreversion
+Source: "..\..\cmake_vs\Release\translations\*.qm"; DestDir: "{app}\translations\"; Flags: ignoreversion
+
+[Icons]
+Name: "{group}\{#MyTitleName}"; Filename: "{app}\{#MyTitleName}.exe"
+
+[Run]
+Filename: "{app}\{#MyTitleName}.exe"; Description: "Launch application"; Flags: postinstall nowait skipifsilent 
