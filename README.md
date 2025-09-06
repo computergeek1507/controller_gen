@@ -2,6 +2,8 @@
 
 Export Controller Specific FSEQ Files
 
+![GUI](/image.png)
+
 ### Building
 Uses C++23, QT 5.15, spdlog, zstd, pugixml, and cMake 3.20.
 
