@@ -288,6 +288,8 @@
     <addaction name="actionSet_Folder"/>
     <addaction name="actionOpen_xLights_Controller_File"/>
     <addaction name="separator"/>
+    <addaction name="actionView_FSEQ_Header"/>
+    <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuAbout">
@@ -312,7 +314,7 @@
   </action>
   <action name="actionOpen_xLights_Controller_File">
    <property name="text">
-    <string>Open xLights Controller File</string>
+    <string>Open xLights Controller File...</string>
    </property>
   </action>
   <action name="actionExit">
@@ -341,6 +343,11 @@
   <action name="actionAbout_QT">
    <property name="text">
     <string>About QT</string>
+   </property>
+  </action>
+  <action name="actionView_FSEQ_Header">
+   <property name="text">
+    <string>View FSEQ Header</string>
    </property>
   </action>
  </widget>
