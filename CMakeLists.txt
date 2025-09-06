@@ -7,7 +7,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Set path to our custom CMAKE scripts
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 
-add_compile_definitions(NO_ZLIB)
+#add_compile_definitions(NO_ZLIB)
 
 # Include Qt deployment helper function
 include(windeployqt)
@@ -42,6 +42,24 @@ if (NOT zstd_POPULATED)
     FetchContent_Populate(zstd)
     add_subdirectory(${zstd_SOURCE_DIR}/build/cmake ${zstd_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
+
+#FetchContent_Declare(ZLIB
+#  GIT_REPOSITORY https://github.com/madler/zlib.git
+#  GIT_TAG 51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf # v1.3.1 (2024-01-22)
+#  OVERRIDE_FIND_PACKAGE
+#)
+
+FetchContent_Declare(
+    zlib
+    GIT_REPOSITORY https://github.com/madler/zlib.git
+    GIT_TAG        v1.3.1 # Or the desired zlib version
+)
+
+FetchContent_MakeAvailable(zlib)
+
+set(SKIP_INSTALL_ALL ON)
+set(ZLIB_BUILD_EXAMPLES OFF)
+
 
 #set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -94,7 +112,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network spdlog::spdlog pugixml::pugixml libzstd_shared)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network spdlog::spdlog pugixml::pugixml zlib libzstd_shared)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

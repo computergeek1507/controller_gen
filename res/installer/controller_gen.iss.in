@@ -30,6 +30,7 @@ Source: "..\..\cmake_vs\Release\imageformats\*.dll"; DestDir: "{app}\imageformat
 Source: "..\..\cmake_vs\Release\styles\*.dll"; DestDir: "{app}\styles\"; Flags: ignoreversion
 Source: "..\..\cmake_vs\Release\translations\*.qm"; DestDir: "{app}\translations\"; Flags: ignoreversion
 Source: "..\..\cmake_vs\_deps\zstd-build\lib\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\cmake_vs\_deps\zlib-build\lib\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#MyTitleName}"; Filename: "{app}\{#MyTitleName}.exe"

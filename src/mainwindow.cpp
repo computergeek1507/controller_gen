@@ -225,6 +225,8 @@ void MainWindow::on_pushButtonExport_clicked()
     V2FSEQFile::CompressionType compressionType = V2FSEQFile::CompressionType::none;
     if (m_ui->comboBoxCompression->currentIndex() == 0) {
         compressionType = V2FSEQFile::CompressionType::zstd;
+    } else if (m_ui->comboBoxCompression->currentIndex() == 1) {
+        compressionType = V2FSEQFile::CompressionType::zlib;
     }
     QProgressDialog progress("Exporting FSEQ Files...", "Abort", 0, m_ui->tableWidgetFSEQs->rowCount(), this);
     bool working = true;
@@ -292,6 +294,8 @@ void MainWindow::on_pushButtonExportAll_clicked()
     V2FSEQFile::CompressionType compressionType = V2FSEQFile::CompressionType::none;
     if (m_ui->comboBoxCompression->currentIndex() == 0) {
         compressionType = V2FSEQFile::CompressionType::zstd;
+    } else if (m_ui->comboBoxCompression->currentIndex() == 1) {
+        compressionType = V2FSEQFile::CompressionType::zlib;
     }
     QProgressDialog progress("Exporting FSEQ Files...", "Abort", 0, m_ui->tableWidgetFSEQs->rowCount() * m_controllers.size(), this);
     bool working = true;
