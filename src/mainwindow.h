@@ -29,9 +29,9 @@ public:
     ~MainWindow();
 
 private slots:
-
-    void on_actionOpen_xLights_Controller_File_triggered();
     void on_actionSet_Folder_triggered();
+    void on_actionOpen_xLights_Controller_File_triggered();    
+    void on_actionView_FSEQ_Header_triggered();
     void on_actionExit_triggered();
     void on_actionOpen_Log_triggered();
     void on_actionAbout_triggered();

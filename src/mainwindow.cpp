@@ -111,6 +111,37 @@ void MainWindow::on_actionOpen_xLights_Controller_File_triggered()
     }
 }
 
+void MainWindow::on_actionView_FSEQ_Header_triggered()
+{
+    auto homeDir = m_fseqFolder.isEmpty() ? QStandardPaths::writableLocation(QStandardPaths::HomeLocation) : m_fseqFolder;
+    auto fn = QFileDialog::getOpenFileName(this, "Select FSEQ File", homeDir, "FSEQ Files (*.fseq *.eseq)");
+
+    if (!fn.isEmpty())
+    {
+        std::unique_ptr<FSEQFile> src(FSEQFile::openFSEQFile(fn.toStdString()));
+        if (nullptr == src) {
+            spdlog::critical("Error opening input file: {}", fn.toStdString());
+            return;
+        }
+		QString info;
+		info += QString("File: %1\n").arg(fn);
+		info += QString("Version: %1.%2\n").arg(src->getVersionMajor()).arg(src->getVersionMinor());
+		info += QString("Channels: %1\n").arg(src->getChannelCount());
+		info += QString("Frames: %1\n").arg(src->getNumFrames());
+		info += QString("Step Time: %1 ms\n").arg(src->getStepTime());
+		info += QString("Total Time: %1 ms\n").arg(src->getTotalTimeMS());
+        if (src->getVersionMajor() == 2 ) {
+            V2FSEQFile* f = (V2FSEQFile*)src.get();
+            info += QString("Compression: %1\n").arg(f->CompressionTypeString().c_str());
+            info += QString("Sparse Ranges:\n");
+            for (const auto& a : f->m_sparseRanges) {                
+                info += QString("Start: %1: Len: %2\n").arg(a.first, a.second);
+            }
+        }
+		QMessageBox::information(this, "FSEQ File Info", info);
+    }
+}
+
 void MainWindow::on_actionExit_triggered()
 {
 	close();
