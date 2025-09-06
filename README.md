@@ -1,6 +1,6 @@
-### FPP View
+### Controller FSEQ Export
 
-FPP Status Monitor 
+Export Controller Specific FSEQ Files
 
 ### Building
 Uses C++23, QT 5.15, spdlog, and cMake 3.20.
