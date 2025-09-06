@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     on_checkBoxSparse_stateChanged(0);
     searchForUSBs();
     auto homeDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-	auto fseqFolder = m_settings->value("FSEQFolder", homeDir).toString();
+    auto fseqFolder = m_settings->value("FSEQFolder", homeDir).toString();
     if (!fseqFolder.isEmpty() && QDir().exists(fseqFolder))
     {
         m_fseqFolder = fseqFolder;
@@ -87,7 +87,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionSet_Folder_triggered()
 {
     auto homeDir = m_fseqFolder.isEmpty() ? QStandardPaths::writableLocation(QStandardPaths::HomeLocation) : m_fseqFolder;
-	auto dir = QFileDialog::getExistingDirectory(this, "Select FSEQ Folder", homeDir);
+    auto dir = QFileDialog::getExistingDirectory(this, "Select FSEQ Folder", homeDir);
 
     if (!dir.isEmpty())
     {
@@ -95,7 +95,7 @@ void MainWindow::on_actionSet_Folder_triggered()
         //m_ui->lineEditFolder->setText(m_fseqFolder);
         m_settings->setValue("FSEQFolder", m_fseqFolder);
         searchForFSEQs();
-	}
+    }
 }
 
 void MainWindow::on_actionOpen_xLights_Controller_File_triggered()
@@ -123,28 +123,28 @@ void MainWindow::on_actionView_FSEQ_Header_triggered()
             spdlog::critical("Error opening input file: {}", fn.toStdString());
             return;
         }
-		QString info;
-		info += QString("File: %1\n").arg(fn);
-		info += QString("Version: %1.%2\n").arg(src->getVersionMajor()).arg(src->getVersionMinor());
-		info += QString("Channels: %1\n").arg(src->getChannelCount());
-		info += QString("Frames: %1\n").arg(src->getNumFrames());
-		info += QString("Step Time: %1 ms\n").arg(src->getStepTime());
-		info += QString("Total Time: %1 ms\n").arg(src->getTotalTimeMS());
+        QString info;
+        info += QString("File: %1\n").arg(src->getFilename().c_str());
+        info += QString("Version: %1.%2\n").arg(src->getVersionMajor()).arg(src->getVersionMinor());
+        info += QString("Channels: %1\n").arg(src->getChannelCount());
+        info += QString("Frames: %1\n").arg(src->getNumFrames());
+        info += QString("Step Time: %1 ms\n").arg(src->getStepTime());
+        info += QString("Total Time: %1 ms\n").arg(src->getTotalTimeMS());
         if (src->getVersionMajor() == 2 ) {
             V2FSEQFile* f = (V2FSEQFile*)src.get();
             info += QString("Compression: %1\n").arg(f->CompressionTypeString().c_str());
             info += QString("Sparse Ranges:\n");
-            for (const auto& a : f->m_sparseRanges) {                
-                info += QString("Start: %1: Len: %2\n").arg(a.first, a.second);
+            for (const auto& a : f->m_sparseRanges) {
+                info += QString("Start: %1 Len: %2\n").arg(a.first).arg(a.second);
             }
         }
-		QMessageBox::information(this, "FSEQ File Info", info);
+        QMessageBox::information(this, "FSEQ File Info", info);
     }
 }
 
 void MainWindow::on_actionExit_triggered()
 {
-	close();
+    close();
 }
 
 void MainWindow::on_actionOpen_Log_triggered()
@@ -170,12 +170,12 @@ void MainWindow::on_actionAbout_triggered()
         "Licensed under the MIT License. See the LICENSE file for details.")
         
         .arg(PROJECT_VER);
-	QMessageBox::about(this, "About", about_text);
+    QMessageBox::about(this, "About", about_text);
 }
 
 void MainWindow::on_actionAbout_QT_triggered()
 {
-	QMessageBox::aboutQt(this, "About Qt");
+    QMessageBox::aboutQt(this, "About Qt");
 }
 
 void MainWindow::on_pushButtonRefresh_clicked()
@@ -205,7 +205,7 @@ void MainWindow::on_pushButtonExport_clicked()
     bool sparse = m_ui->checkBoxSparse->isChecked();
     std::vector<std::pair<uint32_t, uint32_t>> ranges;
     if (sparse) {
-        ranges.push_back(std::pair<uint32_t, uint32_t>(startChannel-1, endChannel));
+        ranges.push_back(std::pair<uint32_t, uint32_t>(startChannel, endChannel));
     }
 
     int major_ver = 2;
@@ -226,26 +226,31 @@ void MainWindow::on_pushButtonExport_clicked()
     if (m_ui->comboBoxCompression->currentIndex() == 0) {
         compressionType = V2FSEQFile::CompressionType::zstd;
     }
-	QProgressDialog progress("Exporting FSEQ Files...", "Abort", 0, m_ui->tableWidgetFSEQs->rowCount(), this);
+    QProgressDialog progress("Exporting FSEQ Files...", "Abort", 0, m_ui->tableWidgetFSEQs->rowCount(), this);
+    bool working = true;
     for (int row = 0; row < m_ui->tableWidgetFSEQs->rowCount(); ++row) {
         QTableWidgetItem* checkBoxItem = m_ui->tableWidgetFSEQs->item(row, 0);
         progress.setValue(row);
         if (checkBoxItem && checkBoxItem->checkState() == Qt::Checked) {
             QTableWidgetItem* fileItem = m_ui->tableWidgetFSEQs->item(row, 1);
-            if (fileItem) {                
-				progress.setLabelText(QString("Exporting %1...").arg(fileItem->text()));
-				QCoreApplication::processEvents();
+            if (fileItem) {
+                progress.setLabelText(QString("Exporting %1...").arg(fileItem->text()));
+                QCoreApplication::processEvents();
                 QString filePath = fileItem->toolTip();
                 if (!filePath.isEmpty()) {
-                    QString outPath = sdcardPath + QDir::separator() + fileItem->text();
+                    QString outPath = sdcardPath + fileItem->text();
                     m_logger->info("Exporting {} to {}", filePath.toStdString(), outPath.toStdString());
-                    exportFSEQFile(filePath.toStdString(), outPath.toStdString(), major_ver, minor_ver, compressionType, ranges, sparse);
+                    working &= exportFSEQFile(filePath.toStdString(), outPath.toStdString(), major_ver, minor_ver, compressionType, ranges, sparse);
                 }
             }
-        }		
+        }
         if (progress.wasCanceled()) {
             break;
         }
+    }
+    if (!working) {
+        QMessageBox::warning(this, "Export Error", "One or more FSEQ files failed to export. See log for details.");
+        return;
     }
     QMessageBox::information(this, "Export Complete", "FSEQ files have been exported to the SD Card.");
 }
@@ -266,15 +271,7 @@ void MainWindow::on_pushButtonExportAll_clicked()
         return;
     }
 
-    int startChannel = m_ui->spinBoxStartChannel->value();
-    int endChannel = m_ui->spinBoxEndChannel->value();
-
     bool sparse = m_ui->checkBoxSparse->isChecked();
-    //std::vector<std::pair<uint32_t, uint32_t>> ranges;
-    //if (sparse)
-    //{
-    //    ranges.push_back(std::pair<uint32_t, uint32_t>(startChannel, endChannel));
-    //}
 
     int major_ver = 2;
     int minor_ver = 2;
@@ -297,28 +294,31 @@ void MainWindow::on_pushButtonExportAll_clicked()
         compressionType = V2FSEQFile::CompressionType::zstd;
     }
     QProgressDialog progress("Exporting FSEQ Files...", "Abort", 0, m_ui->tableWidgetFSEQs->rowCount() * m_controllers.size(), this);
-
+    bool working = true;
     for(int c = 0; c < m_controllers.size(); ++c) {
         auto const& controller = m_controllers[c];
         std::vector<std::pair<uint32_t, uint32_t>> ranges;
-        if (sparse) {
-            ranges.push_back(std::pair<uint32_t, uint32_t>(controller.start_channel - 1, controller.channels));
-        }
+        //if (sparse) {
+            ranges.push_back(std::pair<uint32_t, uint32_t>(controller.start_channel, controller.channels));
+        //}
         for (int row = 0; row < m_ui->tableWidgetFSEQs->rowCount(); ++row) {
-            QTableWidgetItem* fileItem = m_ui->tableWidgetFSEQs->item(row, 1);
+            QTableWidgetItem* checkBoxItem = m_ui->tableWidgetFSEQs->item(row, 0);
             progress.setValue(c * m_ui->tableWidgetFSEQs->rowCount() + row);
-            if (fileItem) {
-                progress.setLabelText(QString("Exporting %1 to %2...").arg(fileItem->text()).arg(controller.name.c_str()));
-                QCoreApplication::processEvents();
-                QString filePath = fileItem->toolTip();
-                if (!filePath.isEmpty()) {
-                    QString outPath = sdcardPath + QDir::separator() + fileItem->text();
-                    if (m_controllers.size() > 1) {
-                        QDir().mkpath(sdcardPath + QDir::separator() + controller.name.c_str());
-                        outPath = sdcardPath + QDir::separator() + controller.name.c_str() + QDir::separator() + fileItem->text();
+            if (checkBoxItem && checkBoxItem->checkState() == Qt::Checked) {
+                QTableWidgetItem* fileItem = m_ui->tableWidgetFSEQs->item(row, 1);                
+                if (fileItem) {
+                    progress.setLabelText(QString("Exporting %1 to %2...").arg(fileItem->text()).arg(controller.name.c_str()));
+                    QCoreApplication::processEvents();
+                    QString filePath = fileItem->toolTip();
+                    if (!filePath.isEmpty()) {
+                        QString outPath = sdcardPath + fileItem->text();
+                        if (m_controllers.size() > 1) {
+                            QDir().mkpath(sdcardPath + QDir::separator() + controller.name.c_str());
+                            outPath = sdcardPath + controller.name.c_str() + QDir::separator() + fileItem->text();
+                        }
+                        m_logger->info("Exporting {} to {}", filePath.toStdString(), outPath.toStdString());
+                        working &= exportFSEQFile(filePath.toStdString(), outPath.toStdString(), major_ver, minor_ver, compressionType, ranges, sparse);
                     }
-                    m_logger->info("Exporting {} to {}", filePath.toStdString(), outPath.toStdString());
-                    exportFSEQFile(filePath.toStdString(), outPath.toStdString(), major_ver, minor_ver, compressionType, ranges, sparse);
                 }
             }
             if (progress.wasCanceled()) {
@@ -328,7 +328,12 @@ void MainWindow::on_pushButtonExportAll_clicked()
         if (progress.wasCanceled()) {
             break;
         }
-	}
+    }
+    if (!working) {
+        QMessageBox::warning(this, "Export Error", "One or more FSEQ files failed to export. See log for details.");
+        return;
+    }
+    QMessageBox::information(this, "Export Complete", "FSEQ files have been exported to the SD Card.");
 }
 
 void MainWindow::on_comboBoxController_currentIndexChanged(int)
@@ -339,9 +344,9 @@ void MainWindow::on_comboBoxController_currentIndexChanged(int)
     }
     auto const& controller = m_controllers[idx];
 
-	m_ui->spinBoxStartChannel->setValue(controller.start_channel);
-	m_ui->spinBoxEndChannel->setValue(controller.channels );
-	//m_logger->info("Selected Controller: {} at {} with {} channels starting at {}", controller.name, controller.ip, controller.totalChannels, controller.startChannel);
+    m_ui->spinBoxStartChannel->setValue(controller.start_channel);
+    m_ui->spinBoxEndChannel->setValue(controller.channels );
+    //m_logger->info("Selected Controller: {} at {} with {} channels starting at {}", controller.name, controller.ip, controller.totalChannels, controller.startChannel);
 }
 
 void MainWindow::on_checkBoxSparse_stateChanged(int)
@@ -351,7 +356,7 @@ void MainWindow::on_checkBoxSparse_stateChanged(int)
         m_ui->spinBoxEndChannel->setEnabled(true);
     } else {
         m_ui->spinBoxStartChannel->setEnabled(false);
-		m_ui->spinBoxEndChannel->setEnabled(false);
+        m_ui->spinBoxEndChannel->setEnabled(false);
     }
 }
 
@@ -366,8 +371,8 @@ void MainWindow::refreshList(QFileInfoList const& files)
     for (const QFileInfo& fileInfo : files) {
         QTableWidgetItem* checkBoxItem = new QTableWidgetItem();
         checkBoxItem->setFlags(checkBoxItem->flags() | Qt::ItemIsUserCheckable);
-		checkBoxItem->setCheckState(Qt::Checked);
-		m_ui->tableWidgetFSEQs->setItem(row, 0, checkBoxItem);
+        checkBoxItem->setCheckState(Qt::Checked);
+        m_ui->tableWidgetFSEQs->setItem(row, 0, checkBoxItem);
         //m_ui->tableWidgetFSEQs->setItem(row, 0, new QTableWidgetItem());
         //m_ui->tableWidgetFSEQs->item(row, 0)->setText(fileInfo.fileName());
         //m_ui->tableWidgetFSEQs->item(row, 0)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
@@ -379,7 +384,7 @@ void MainWindow::refreshList(QFileInfoList const& files)
         m_ui->tableWidgetFSEQs->item(row, 2)->setText(fileInfo.lastModified().toString(Qt::ISODate));
         m_ui->tableWidgetFSEQs->item(row, 2)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         row++;
-	}
+    }
     m_ui->tableWidgetFSEQs->resizeColumnsToContents();
     m_ui->tableWidgetFSEQs->horizontalHeader()->setStretchLastSection(true);
 }
@@ -387,8 +392,8 @@ void MainWindow::refreshList(QFileInfoList const& files)
 void MainWindow::loadControllerFile(const QString& filename)
 {
     m_logger->info("Loading xLights Controller File: {}", filename.toStdString());
-	m_ui->comboBoxController->clear();
-	m_controllers.clear();
+    m_ui->comboBoxController->clear();
+    m_controllers.clear();
     pugi::xml_document doc;
 
     pugi::xml_parse_result result = doc.load_file(filename.toStdString().c_str());
@@ -396,28 +401,28 @@ void MainWindow::loadControllerFile(const QString& filename)
     if(!networks) {
         m_logger->error("No Networks node found in the controller file.");
         return;
-	}
+    }
     uint64_t startChannel{ 1 };
     for (pugi::xml_node controller = networks.child("Controller"); controller; controller = controller.next_sibling("Controller")) {
-		auto name = controller.attribute("Name").value();
-		auto ip = controller.attribute("IP").value();
+        auto name = controller.attribute("Name").value();
+        auto ip = controller.attribute("IP").value();
         //std::cout << "Tool " << tool.attribute("Name").value() << "\n";
             //std::cout << "Tool " << tool.attribute("IP").value() << "\n";
-		int totalChannels = {0};
+        int totalChannels = {0};
         for (pugi::xml_node network = controller.child("network"); network; network = network.next_sibling("network")) {
-			int size = network.attribute("MaxChannels").as_int();
-			totalChannels += size;
+            int size = network.attribute("MaxChannels").as_int();
+            totalChannels += size;
             //std::cout << "Tool " << tool.attribute("Name").value() << "\n";
             //std::cout << "Tool " << tool.attribute("IP").value() << "\n";;
         }
         if(totalChannels != 0) {
             m_logger->info("Found Controller: {} at {} with {} channels starting at {}", name, ip, totalChannels, startChannel);
             m_controllers.emplace_back(name, ip, startChannel, totalChannels);
-			m_ui->comboBoxController->addItem(QString("%1 (%2)").arg(name).arg(ip));
+            m_ui->comboBoxController->addItem(QString("%1 (%2)").arg(name).arg(ip));
         } else {
             m_logger->warn("Found Controller: {} at {} with 0 channels, skipping", name, ip);
-	    }
-		startChannel += totalChannels;
+        }
+        startChannel += totalChannels;
     }
 }
 
@@ -429,24 +434,24 @@ void MainWindow::searchForFSEQs()
     if (files.isEmpty()) {
         qDebug() << "No .fseq files found in the directory.";
         return;
-	}
-	refreshList(files);
+    }
+    refreshList(files);
 
     auto const file = m_fseqFolder + QDir::separator() + "xlights_networks.xml";
 
     if (QFile::exists(file)) {
         loadControllerFile(file);
     } else {
-		m_logger->warn("No xLights Controller File found in the FSEQ folder.");
+        m_logger->warn("No xLights Controller File found in the FSEQ folder.");
     }
 }
 void MainWindow::searchForUSBs()
 {
-	m_ui->comboBoxSDCard->clear();
+    m_ui->comboBoxSDCard->clear();
     auto const mountedVolumes = QStorageInfo::mountedVolumes();
     for ( QStorageInfo const& storage : mountedVolumes) {
         if (storage.isReady() && storage.isValid()) {
-			m_ui->comboBoxSDCard->addItem(storage.displayName() + " (" + storage.rootPath() + ")", storage.rootPath());
+            m_ui->comboBoxSDCard->addItem(storage.displayName() + " (" + storage.rootPath() + ")", storage.rootPath());
             qDebug() << "  Device:" << storage.device();
             qDebug() << "  Name:" << storage.name();
             qDebug() << "  Root Path:" << storage.rootPath();
@@ -455,13 +460,13 @@ void MainWindow::searchForUSBs()
     }
 }
 
-void MainWindow::exportFSEQFile(std::string const& in_path, std::string const& out_path,int major_ver, int minor_ver, V2FSEQFile::CompressionType compressionType, std::vector<std::pair<uint32_t, uint32_t>> ranges, bool sparse)
+bool MainWindow::exportFSEQFile(std::string const& in_path, std::string const& out_path,int major_ver, int minor_ver, V2FSEQFile::CompressionType compressionType, std::vector<std::pair<uint32_t, uint32_t>> ranges, bool sparse)
 {
     int compressionLevel = -99;
     std::unique_ptr<FSEQFile> src(FSEQFile::openFSEQFile(in_path));
     if (nullptr == src) {
         spdlog::critical("Error opening input file: {}", in_path);
-        return;
+        return false;
     }
     uint32_t channelCount{ 0 };
     for (auto const& [start, count] : ranges) {
@@ -480,7 +485,7 @@ void MainWindow::exportFSEQFile(std::string const& in_path, std::string const& o
         compressionLevel));
     if (nullptr == dest) {
         spdlog::critical("Failed to create FSEQ file (returned nullptr)!");
-        return;
+        return false;
     }
     dest->enableMinorVersionFeatures(minor_ver);
 
@@ -523,4 +528,5 @@ void MainWindow::exportFSEQFile(std::string const& in_path, std::string const& o
     dest->finalize();
     delete[] tmpBuf;
     delete[] WriteBuf;
+    return true;
 }

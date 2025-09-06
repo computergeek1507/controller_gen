@@ -54,7 +54,7 @@ private:
 
     std::vector<Controller> m_controllers;
 
-    void exportFSEQFile(std::string const& in_path, std::string const& out_path, 
+    bool exportFSEQFile(std::string const& in_path, std::string const& out_path, 
         int major_ver, int minor_ver, V2FSEQFile::CompressionType, 
         std::vector<std::pair<uint32_t, uint32_t>> ranges, bool sparse);
 
