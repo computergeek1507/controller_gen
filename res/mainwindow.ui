@@ -45,16 +45,17 @@
        <string>FSEQ Settings</string>
       </property>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="2">
-        <widget class="QLabel" name="label_2">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+       <item row="4" column="1">
+        <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Compression:</string>
+          <string>Start Ch:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="3">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Channels:</string>
          </property>
         </widget>
        </item>
@@ -68,10 +69,80 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
-        <widget class="QLabel" name="label_3">
+       <item row="0" column="3">
+        <widget class="QComboBox" name="comboBoxCompression">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <item>
+          <property name="text">
+           <string>ZSTD</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>ZLIB</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>None</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="text">
-          <string>Start Ch:</string>
+          <string>FSEQ Ver:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="6">
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="4" column="0">
+        <widget class="QCheckBox" name="checkBoxSparse">
+         <property name="layoutDirection">
+          <enum>Qt::RightToLeft</enum>
+         </property>
+         <property name="text">
+          <string>Sparse</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Compression:</string>
          </property>
         </widget>
        </item>
@@ -105,65 +176,27 @@
          </item>
         </widget>
        </item>
-       <item row="4" column="0">
-        <widget class="QCheckBox" name="checkBoxSparse">
-         <property name="layoutDirection">
-          <enum>Qt::RightToLeft</enum>
-         </property>
+       <item row="0" column="4">
+        <widget class="QLabel" name="label_7">
          <property name="text">
-          <string>Sparse</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
+          <string>Level:</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="3">
-        <widget class="QComboBox" name="comboBoxCompression">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+       <item row="0" column="5">
+        <widget class="QSpinBox" name="spinBoxCompressionLevel">
+         <property name="minimum">
+          <number>-99</number>
          </property>
-         <item>
-          <property name="text">
-           <string>ZSTD</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>ZLIB</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>None</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item row="4" column="3">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Channels:</string>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>-99</number>
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>FSEQ Ver:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="4">
+       <item row="4" column="4" colspan="2">
         <widget class="QSpinBox" name="spinBoxEndChannel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -181,19 +214,6 @@
           <number>10000000</number>
          </property>
         </widget>
-       </item>
-       <item row="4" column="5">
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>
