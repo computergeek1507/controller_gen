@@ -63,8 +63,8 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         QMessageBox::warning(this, "Logger Failed", "Logger Failed To Start.");
     }
-
-    setWindowTitle(windowTitle() + " v" + PROJECT_VER);
+    m_title = windowTitle();
+    setWindowTitle(m_title + " v" + PROJECT_VER);
 
     m_settings = std::make_unique< QSettings>(m_appdir + "/settings.txt", QSettings::IniFormat);
 
@@ -75,10 +75,9 @@ MainWindow::MainWindow(QWidget *parent) :
     if (!fseqFolder.isEmpty() && QDir().exists(fseqFolder))
     {
         m_fseqFolder = fseqFolder;
-        //m_ui->lineEditFolder->setText(m_fseqFolder);
+		setWindowTitle(m_title + " - " + m_fseqFolder);
         searchForFSEQs();
-    }
-    
+    }    
 }
 
 MainWindow::~MainWindow()
@@ -88,22 +87,22 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionSet_Folder_triggered()
 {
-    auto homeDir = m_fseqFolder.isEmpty() ? QStandardPaths::writableLocation(QStandardPaths::HomeLocation) : m_fseqFolder;
-    auto dir = QFileDialog::getExistingDirectory(this, "Select FSEQ Folder", homeDir);
+    auto const homeDir = m_fseqFolder.isEmpty() ? QStandardPaths::writableLocation(QStandardPaths::HomeLocation) : m_fseqFolder;
+    auto const dir = QFileDialog::getExistingDirectory(this, "Select FSEQ Folder", homeDir);
 
     if (!dir.isEmpty())
     {
         m_fseqFolder = dir;
-        //m_ui->lineEditFolder->setText(m_fseqFolder);
         m_settings->setValue("FSEQFolder", m_fseqFolder);
+        setWindowTitle(m_title + " - " + m_fseqFolder);
         searchForFSEQs();
     }
 }
 
 void MainWindow::on_actionOpen_xLights_Controller_File_triggered()
 {
-    auto homeDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
-    auto fn = QFileDialog::getOpenFileName(this, "Select xLights Controller File", homeDir, "xLights Controller Files (xlights_networks.xml)");
+    auto const homeDir = QStandardPaths::writableLocation(QStandardPaths::HomeLocation);
+    auto const fn = QFileDialog::getOpenFileName(this, "Select xLights Controller File", homeDir, "xLights Controller Files (xlights_networks.xml)");
 
     if (!fn.isEmpty())
     {
@@ -115,8 +114,8 @@ void MainWindow::on_actionOpen_xLights_Controller_File_triggered()
 
 void MainWindow::on_actionView_FSEQ_Header_triggered()
 {
-    auto homeDir = m_fseqFolder.isEmpty() ? QStandardPaths::writableLocation(QStandardPaths::HomeLocation) : m_fseqFolder;
-    auto fn = QFileDialog::getOpenFileName(this, "Select FSEQ File", homeDir, "FSEQ Files (*.fseq *.eseq)");
+    auto const homeDir = m_fseqFolder.isEmpty() ? QStandardPaths::writableLocation(QStandardPaths::HomeLocation) : m_fseqFolder;
+    auto const fn = QFileDialog::getOpenFileName(this, "Select FSEQ File", homeDir, "FSEQ Files (*.fseq *.eseq)");
 
     if (!fn.isEmpty())
     {
@@ -239,7 +238,7 @@ void MainWindow::on_pushButtonExport_clicked()
             if (fileItem) {
                 progress.setLabelText(QString("Exporting %1...").arg(fileItem->text()));
                 QCoreApplication::processEvents();
-                QString filePath = fileItem->toolTip();
+                QString const filePath = fileItem->toolTip();
                 if (!filePath.isEmpty()) {
                     QString outPath = sdcardPath + fileItem->text();
                     m_logger->info("Exporting {} to {}", filePath.toStdString(), outPath.toStdString());
@@ -312,7 +311,7 @@ void MainWindow::on_pushButtonExportAll_clicked()
                 if (fileItem) {
                     progress.setLabelText(QString("Exporting %1 to %2...").arg(fileItem->text()).arg(controller.name.c_str()));
                     QCoreApplication::processEvents();
-                    QString filePath = fileItem->toolTip();
+                    QString const filePath = fileItem->toolTip();
                     if (!filePath.isEmpty()) {
                         QString outPath = sdcardPath + fileItem->text();
                         if (m_controllers.size() > 1) {

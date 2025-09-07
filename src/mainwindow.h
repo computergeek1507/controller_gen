@@ -51,6 +51,7 @@ private:
     QString m_appdir;
 
     QString m_fseqFolder;
+    QString m_title;
 
     std::vector<Controller> m_controllers;
 
