@@ -57,6 +57,16 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(zlib)
 
+FetchContent_Declare(nlohmann_json
+  GIT_REPOSITORY https://github.com/nlohmann/json
+  GIT_TAG v3.12.0)
+
+FetchContent_GetProperties(nlohmann_json)
+if(NOT nlohmann_json_POPULATED)
+  FetchContent_Populate(nlohmann_json)
+  add_subdirectory( ${nlohmann_json_SOURCE_DIR} ${nlohmann_json_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
 set(SKIP_INSTALL_ALL ON)
 set(ZLIB_BUILD_EXAMPLES OFF)
 
@@ -96,23 +106,15 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
-    if(ANDROID)
-        add_library(${PROJECT_NAME} SHARED
-            ${BASE_SRC}
-            ${BASE_RES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
+
         add_executable(${PROJECT_NAME}
             ${BASE_SRC}
             ${BASE_RES}
             res/${PROJECT_NAME}.qrc
         )
-    endif()
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network spdlog::spdlog pugixml::pugixml zlib libzstd_shared)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Network spdlog::spdlog pugixml::pugixml zlib libzstd_shared nlohmann_json::nlohmann_json)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
