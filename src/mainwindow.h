@@ -19,6 +19,7 @@ class MainWindow;
 }
 
 struct Controller;
+class AutoUpdater;
 
 class MainWindow : public QMainWindow
 {
@@ -48,6 +49,7 @@ private:
 
     std::shared_ptr<spdlog::logger> m_logger{ nullptr };
     std::unique_ptr<QSettings> m_settings{ nullptr };
+    std::unique_ptr < AutoUpdater> m_updater{ nullptr };
     QString m_appdir;
 
     QString m_fseqFolder;

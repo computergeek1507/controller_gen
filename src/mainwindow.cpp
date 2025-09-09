@@ -4,6 +4,7 @@
 #include "config.h"
 
 #include "controller.h"
+#include "auto_updater.h"
 
 #include <QTableWidgetItem>
 #include <QSettings>
@@ -14,6 +15,8 @@
 #include <QUrlQuery>
 #include <QFileDialog>
 #include <QStorageInfo>
+#include <QProgressDialog>
+#include <QStandardPaths>
 
 #include "spdlog/spdlog.h"
 
@@ -23,13 +26,11 @@
 #include "pugixml.hpp"
 
 #include <iostream>
-
 #include <memory>
 #include <filesystem>
 #include <utility>
 #include <fstream>
 #include <sstream>
-#include <QProgressDialog>
 
 enum class FSEQColumn : int { Enabled = 0, FileName, DataModified };
 
@@ -53,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
         auto file{ std::string(logdir.toStdString() + log_name) };
         auto rotating = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(file, 1024 * 1024, 5, false);
 
-        m_logger = std::make_shared<spdlog::logger>("box_design", rotating);
+        m_logger = std::make_shared<spdlog::logger>(PROJECT_NAME, rotating);
         m_logger->flush_on(spdlog::level::debug);
         m_logger->set_level(spdlog::level::debug);
         m_logger->set_pattern("[%D %H:%M:%S] [%L] %v");
@@ -77,7 +78,26 @@ MainWindow::MainWindow(QWidget *parent) :
         m_fseqFolder = fseqFolder;
 		setWindowTitle(m_title + " - " + m_fseqFolder);
         searchForFSEQs();
-    }    
+    }
+    m_updater = std::make_unique<AutoUpdater>(this);
+    connect(m_updater.get(), &AutoUpdater::updateError, this, [](int code, const QString& message) {
+        QMessageBox::warning(nullptr, "Update Check Failed", QString("Update check failed: %1 - %2").arg(code).arg(message));
+        });
+
+    connect(m_updater.get(), &AutoUpdater::updateCheckFinished, this, [this](bool updateAvailable, const VersionInfo& info) {
+        if (updateAvailable) {
+            QString msg = QString("A new version of %1 is available!\n\nVersion: %2\n\nRelease Notes:\n%3\n\nDo you want to download it now?")
+                .arg(PROJECT_NAME)
+                .arg(info.Version)
+                .arg(info.Changes);
+            auto ret = QMessageBox::question(this, "Update Available", msg, QMessageBox::Yes | QMessageBox::No);
+            if (ret == QMessageBox::Yes) {
+                m_updater->downloadUpdateFile(info.UpdateUrl);
+            }
+        }
+       });
+
+	m_updater->checkForUpdates(false);
 }
 
 MainWindow::~MainWindow()
@@ -506,37 +526,4 @@ bool MainWindow::exportFSEQFile(std::string const& in_path, std::string const& o
     free(data);
     dest->finalize();
     return true;
-    /*
-
-    uint8_t* WriteBuf = new uint8_t[channelCount];
-
-    // read buff
-    uint8_t* tmpBuf = new uint8_t[ogNum_Channels];
-
-    uint32_t frame{ 0 };
-
-    while (frame < ogNumber_of_Frames) {
-        FSEQFile::FrameData* data = src->getFrame(frame);
-
-        data->readFrame(tmpBuf, ogNum_Channels); // we have a read frame
-
-        uint8_t* destBuf = WriteBuf;
-
-        // Loop through ranges
-        for (auto const& [start, count] : ranges) {
-            uint8_t* tempSrc = tmpBuf + start;
-            memmove(destBuf, tempSrc, count);
-            destBuf += count;
-        }
-        dest->addFrame(frame, WriteBuf);
-
-        delete data;
-        frame++;
-    }
-
-    dest->finalize();
-    delete[] tmpBuf;
-    delete[] WriteBuf;
-    return true;
-    */
 }
